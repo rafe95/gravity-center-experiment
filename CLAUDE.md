@@ -1,3 +1,31 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+Angular 22 CLI app; unit tests run on Vitest via `@angular/build:unit-test` (jsdom).
+
+- Dev server: `npm start` (http://localhost:4200)
+- Build: `npm run build` (output in `dist/`)
+- All tests once: `npx ng test --watch=false`
+- One spec file: `npx ng test --watch=false --include src/app/gravity-cluster/gravity-layout.spec.ts`
+- Tests by name: `npx ng test --watch=false --filter "valueRadii"`
+- Format: `npx prettier --write src` (config in `.prettierrc`: 100 cols, single quotes, Angular parser for HTML). No linter is configured.
+
+## Architecture
+
+The app is an experiment around one reusable component, `app-gravity-cluster`, which draws values as circles packed around a center of gravity. `App` (`src/app/app.*`) is only a demo page: concept examples plus a playground comparing default vs `sorted` mode.
+
+The component is split in two layers under `src/app/gravity-cluster/`:
+
+- `gravity-layout.ts`: pure, framework-free geometry. Two radius strategies (`rankRadii`: shrinks by position; `valueRadii`: linear between `minRatio * baseRadius` for the lowest value and `baseRadius` for the highest) feed `gravityLayout(radii, gap)`. It places circles greedily: circle 0 at the origin; each next circle goes to the non-overlapping candidate spot (on rings around placed circles, or tangent to two of them) that is nearest circle 0, with ties broken by distance to the area-weighted centroid, then horizontal, lower, right. The result is recentred on its bounding box. Unit-test layout changes here, including the no-overlap invariant.
+- `gravity-cluster.ts`: the Angular component (inline template/styles, SVG). Inputs: `items: {id, value}[]`, `sorted` (orders by value descending and uses `valueRadii`), plus sizing knobs `radius`, `gap`, `decay`, `minRatio`. Output `itemClick` emits the item `id`. It computes a square viewBox with a minimum size so small clusters don't fill the panel, and positions nodes with CSS `transform` so moves animate (disabled under `prefers-reduced-motion`). Nodes are tracked by `id`.
+
+Accessibility contract the tests rely on: each circle is a `<g class="node" role="button" tabindex="0">` labelled `Value N`, activated by click/Enter/Space, with a separate `.focus-ring` circle shown on `:focus-visible`. Because of that extra circle, count `.node` elements (not `circle`) in tests. Colors are themeable via `--gravity-cluster-ink`, `--gravity-cluster-fill`, `--gravity-cluster-hover-fill`, `--gravity-cluster-focus`.
+
+## Coding Guidelines
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## TypeScript Best Practices

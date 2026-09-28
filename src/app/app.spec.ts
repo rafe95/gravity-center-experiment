@@ -5,20 +5,14 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
+  it('renders one cluster per concept example plus both playground clusters', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, gravity-center-experiment');
+    expect(compiled.querySelectorAll('app-gravity-cluster').length).toBe(7);
+    expect(compiled.querySelectorAll('.grid .node').length).toBe(1 + 2 + 3 + 5 + 9);
   });
 });
