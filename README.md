@@ -4,16 +4,20 @@ An Angular experiment that shows a list of values as circles packed around a sha
 gravity. The first (or highest) value sits in the middle, and each value after it moves into the
 nearest free spot. This forms a compact, balanced cluster instead of a grid or a list.
 
-![Playground: the same eleven values in input order (left) and with sorted = true (right)](playground-screenshot.png)
+![Playground: the same seven values in the four combinations of sorted and randomize](playground-screenshot.png)
 
-The screenshot shows the playground with the same eleven values rendered twice:
+The screenshot shows the playground with the same seven values rendered four ways:
 
-- **Default (left):** items keep their input order. The first item (`11`) is the center of
-  gravity. Circles get slightly smaller with each position, so the item's place in the list sets
-  its size.
-- **`sorted = true` (right):** items are ordered from highest to lowest value, and circle size
-  follows the value. The highest value (`96`) is the largest circle and sits in the center.
-  Values like `85` and `81` stay close to it, and the lowest values end up small and on the edge.
+- **Default:** items keep their input order. The first item (`11`) is the center of gravity.
+  Circles get slightly smaller with each position, so the item's place in the list sets its size.
+- **`sorted = true`:** items are ordered from highest to lowest value, and circle size follows the
+  value. The highest value (`96`) is the largest circle and sits in the center, `85` stays close
+  to it, and the lowest value (`11`) ends up small and on the edge.
+- **`randomize = true`:** the center stays the same, but each circle picks randomly among the free
+  spots near the center, so the cluster gets a looser, different shape on every layout. The
+  "Shuffle random layouts" button re-rolls it.
+- **`sorted = true, randomize = true`:** both at once: sized and centered by value, with a random
+  arrangement around `96`.
 
 ## How the layout works
 
@@ -39,6 +43,7 @@ The placement logic is plain TypeScript with no Angular code, in
 | -------------- | --------------------------------- | ------- | ----------------------------------------------------------------- |
 | `items`        | `{ id: number; value: number }[]` | —       | Values to render. Required.                                       |
 | `sorted`       | `boolean`                         | `false` | Order by value (highest in the center) and size circles by value. |
+| `randomize`    | `boolean`                         | `false` | With more than two items, pick randomly among near-center spots.  |
 | `radius`       | `number`                          | `50`    | Radius of the largest circle, in SVG units.                       |
 | `gap`          | `number`                          | `10`    | Space between circles.                                            |
 | `decay`        | `number`                          | `0.04`  | How much each circle shrinks by position (when not sorted).       |

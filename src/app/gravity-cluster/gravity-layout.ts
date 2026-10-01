@@ -44,15 +44,51 @@ export function valueRadii(values: readonly number[], options: RadiusOptions): n
  * Circle 0 is placed first; every following circle is dropped into the free spot
  * closest to circle 0, preferring spots near the (area-weighted) centroid on ties.
  * The result is re-centered so the cluster's bounding box is centered on the origin.
+ *
+ * Pass `random` (returning numbers in [0, 1)) to randomize the shape of clusters with more
+ * than two circles: each circle then picks randomly among the free spots that are nearly as
+ * close to circle 0 as the best one, so the cluster stays compact but varies run to run.
  */
-export function gravityLayout(radii: readonly number[], gap: number): PlacedCircle[] {
+export function gravityLayout(
+  radii: readonly number[],
+  gap: number,
+  random?: () => number,
+): PlacedCircle[] {
   const placed: PlacedCircle[] = [];
+  const pick = radii.length > 2 ? random : undefined;
 
   for (const r of radii) {
-    placed.push(placed.length === 0 ? { x: 0, y: 0, r } : { ...bestSpot(placed, r, gap), r });
+    if (placed.length === 0) {
+      placed.push({ x: 0, y: 0, r });
+    } else {
+      const spot = pick ? randomSpot(placed, r, gap, pick) : bestSpot(placed, r, gap);
+      placed.push({ ...spot, r });
+    }
   }
 
   return recenter(placed);
+}
+
+/** How far (as a fraction of the new circle's radius) a random spot may be from the best one. */
+const RANDOM_SLACK = 0.35;
+
+function randomSpot(
+  placed: PlacedCircle[],
+  r: number,
+  gap: number,
+  random: () => number,
+): { x: number; y: number } {
+  const spots = freeSpots(placed, r, gap).map((spot) => ({
+    spot,
+    distance: Math.hypot(spot.x - placed[0].x, spot.y - placed[0].y),
+  }));
+  const nearest = Math.min(...spots.map((s) => s.distance));
+  const close = spots.filter((s) => s.distance <= nearest + r * RANDOM_SLACK);
+  return close[Math.floor(random() * close.length)]?.spot ?? bestSpot(placed, r, gap);
+}
+
+function freeSpots(placed: PlacedCircle[], r: number, gap: number): { x: number; y: number }[] {
+  return [...candidates(placed, r, gap)].filter((c) => fits(c, r, placed, gap));
 }
 
 function bestSpot(placed: PlacedCircle[], r: number, gap: number): { x: number; y: number } {
@@ -60,10 +96,7 @@ function bestSpot(placed: PlacedCircle[], r: number, gap: number): { x: number; 
   let best: { x: number; y: number } | undefined;
   let bestKey: number[] = [];
 
-  for (const candidate of candidates(placed, r, gap)) {
-    if (!fits(candidate, r, placed, gap)) {
-      continue;
-    }
+  for (const candidate of freeSpots(placed, r, gap)) {
     // Closest to the heaviest (first) circle, then to the cluster's centroid so it stays
     // balanced; remaining ties favour horizontal, then lower, then right.
     const key = [
@@ -117,7 +150,12 @@ function* tangentToBoth(a: PlacedCircle, b: PlacedCircle, r: number, gap: number
   yield { x: mx + (h * dy) / d, y: my - (h * dx) / d };
 }
 
-function fits(p: { x: number; y: number }, r: number, placed: PlacedCircle[], gap: number): boolean {
+function fits(
+  p: { x: number; y: number },
+  r: number,
+  placed: PlacedCircle[],
+  gap: number,
+): boolean {
   return placed.every((c) => Math.hypot(p.x - c.x, p.y - c.y) >= c.r + r + gap - EPSILON);
 }
 

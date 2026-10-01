@@ -8,10 +8,11 @@ describe('GravityCluster', () => {
     { id: 9, value: 99 },
   ];
 
-  async function setup(sorted = false) {
+  async function setup(sorted = false, randomize = false) {
     const fixture = TestBed.createComponent(GravityCluster);
     fixture.componentRef.setInput('items', items);
     fixture.componentRef.setInput('sorted', sorted);
+    fixture.componentRef.setInput('randomize', randomize);
     const emitted: number[] = [];
     fixture.componentInstance.itemClick.subscribe((id) => emitted.push(id));
     await fixture.whenStable();
@@ -51,6 +52,13 @@ describe('GravityCluster', () => {
 
   it('still emits the original id when sorted', async () => {
     const { nodes, emitted } = await setup(true);
+    nodes[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(emitted).toEqual([9]);
+  });
+
+  it('keeps sorted order and ids when randomized', async () => {
+    const { nodes, emitted } = await setup(true, true);
+    expect([...nodes].map((n) => n.textContent?.trim())).toEqual(['99', '42', '13']);
     nodes[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(emitted).toEqual([9]);
   });

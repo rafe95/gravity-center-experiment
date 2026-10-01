@@ -24,6 +24,7 @@
     <h2 id="playground-heading">Playground</h2>
     <label for="count">Circles: {{ count() }}</label>
     <input id="count" type="range" min="0" max="30" [value]="count()" (input)="setCount($event)" />
+    <button type="button" class="shuffle" (click)="reroll()">Shuffle random layouts</button>
     <div class="compare">
       <figure class="panel">
         <app-gravity-cluster [items]="playground()" (itemClick)="selectedId.set($event)" />
@@ -36,6 +37,23 @@
           (itemClick)="selectedId.set($event)"
         />
         <figcaption>sorted = true</figcaption>
+      </figure>
+      <figure class="panel">
+        <app-gravity-cluster
+          [items]="randomItems()"
+          [randomize]="true"
+          (itemClick)="selectedId.set($event)"
+        />
+        <figcaption>randomize = true</figcaption>
+      </figure>
+      <figure class="panel">
+        <app-gravity-cluster
+          [items]="randomItems()"
+          [sorted]="true"
+          [randomize]="true"
+          (itemClick)="selectedId.set($event)"
+        />
+        <figcaption>sorted = true, randomize = true</figcaption>
       </figure>
     </div>
   </section>

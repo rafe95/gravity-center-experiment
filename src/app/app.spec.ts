@@ -8,11 +8,11 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('renders one cluster per concept example plus both playground clusters', async () => {
+  it('renders one cluster per concept example plus the four playground clusters', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelectorAll('app-gravity-cluster').length).toBe(7);
+    expect(compiled.querySelectorAll('app-gravity-cluster').length).toBe(9);
     expect(compiled.querySelectorAll('.grid .node').length).toBe(1 + 2 + 3 + 5 + 9);
   });
 });

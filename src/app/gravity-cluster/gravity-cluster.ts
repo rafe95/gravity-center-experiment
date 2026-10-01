@@ -113,6 +113,12 @@ export class GravityCluster {
    */
   readonly sorted = input(false);
 
+  /**
+   * When enabled and there are more than two items, circles pick randomly among the free
+   * spots near the center, giving a different (still compact) shape on every layout.
+   */
+  readonly randomize = input(false);
+
   protected readonly circles = computed(() => {
     const sorted = this.sorted();
     const items = sorted ? [...this.items()].sort((a, b) => b.value - a.value) : this.items();
@@ -127,7 +133,7 @@ export class GravityCluster {
           radiusOptions,
         )
       : rankRadii(items.length, radiusOptions);
-    const layout = gravityLayout(radii, this.gap());
+    const layout = gravityLayout(radii, this.gap(), this.randomize() ? Math.random : undefined);
     return layout.map((c, i) => ({
       ...c,
       id: items[i].id,
