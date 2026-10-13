@@ -2,10 +2,8 @@
   <h1>Gravity cluster</h1>
 
   <p class="status" aria-live="polite">
-    @if (selectedId() === null) {
-      Click a circle to select it.
-    } @else {
-      Clicked id: <strong>{{ selectedId() }}</strong>
+    @if (selectedId() === null) { Click a circle to select it. } @else { Clicked id:
+    <strong>{{ selectedId() }}</strong>
     }
   </p>
 
@@ -13,9 +11,9 @@
     <h2 id="examples-heading">Concept examples</h2>
     <ul class="grid">
       @for (items of examples; track $index) {
-        <li class="panel">
-          <app-gravity-cluster [items]="items" (itemClick)="selectedId.set($event)" />
-        </li>
+      <li class="panel">
+        <app-gravity-cluster [items]="items" (itemClick)="selectedId.set($event)" />
+      </li>
       }
     </ul>
   </section>
